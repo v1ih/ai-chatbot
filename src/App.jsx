@@ -11,6 +11,27 @@ const App = () => {
   const [showChatbot, setShowChatbot] = useState(false);
   const chatBotRef = useRef();
 
+  const getLocalResponse = (message) => {
+    const text = message.toLowerCase();
+
+    if (text.includes("menu") || text.includes("coffee") || text.includes("drink")) {
+      return "Our menu includes espresso, cappuccino, lattes, cold brew, pour over, matcha, chai, pastries and snacks. A classic latte is $4.50 and our cold brew is $4.50.";
+    }
+    if (text.includes("hour") || text.includes("open") || text.includes("close")) {
+      return "Aroma Beans is open Monday to Friday from 7:00 AM to 9:00 PM, and on weekends from 8:00 AM to 10:00 PM.";
+    }
+    if (text.includes("where") || text.includes("address") || text.includes("location")) {
+      return "You can find Aroma Beans at 123 Coffee Lane, Brew City, California.";
+    }
+    if (text.includes("contact") || text.includes("phone") || text.includes("email")) {
+      return "You can reach the café at hello@aromabeanscoffee.com or +1 (555) 123-4567.";
+    }
+    if (text.includes("brew") || text.includes("tip")) {
+      return "For a balanced pour over, start with freshly ground coffee, use water just below boiling, and aim for a brewing time between 3 and 4 minutes.";
+    }
+    return "I can help with our menu, opening hours, location, contact details and brewing tips. What would you like to know?";
+  };
+
   const generateBotResponse = async (history) => {
     const updateHistory = (text, isError = false ) => {
       setChatHistory(prev => [
@@ -18,6 +39,13 @@ const App = () => {
         {role: "model", text, isError}
       ]);
     }
+    const latestMessage = history.filter(({ role }) => role === "user").at(-1)?.text || "";
+
+    if (!import.meta.env.VITE_API_URL) {
+      window.setTimeout(() => updateHistory(getLocalResponse(latestMessage)), 500);
+      return;
+    }
+
     history = history.map(({role, text}) => ({role, parts: [{text}]}));
 
 
