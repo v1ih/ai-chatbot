@@ -4,5 +4,6 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/ai-chatbot/',
+  // Caminho relativo: funciona tanto na Vercel (raiz) quanto no GitHub Pages (/ai-chatbot/)
+  base: './',
 })
