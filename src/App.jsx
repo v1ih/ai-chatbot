@@ -41,30 +41,21 @@ const App = () => {
     }
     const latestMessage = history.filter(({ role }) => role === "user").at(-1)?.text || "";
 
-    if (!import.meta.env.VITE_API_URL) {
-      window.setTimeout(() => updateHistory(getLocalResponse(latestMessage)), 500);
-      return;
-    }
-
     history = history.map(({role, text}) => ({role, parts: [{text}]}));
 
-
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: history })
-    }
-
+    // A chave do Gemini fica na função /api/chat (Vercel). Onde ela não existe
+    // (GitHub Pages, ou sem GEMINI_API_KEY configurada), usa as respostas locais.
     try {
-      const response = await fetch(import.meta.env.VITE_API_URL, requestOptions);
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error.message || "Failed to fetch response. Something went wrong.");
-      }
-      const apiResponseText = data.candidates[0].content.parts[0].text.replace(/<[^>]*>/g, '').trim();
-      updateHistory(apiResponseText);
-    } catch (error) {
-      updateHistory(error.message, true);
+      const response = await fetch("/api/chat", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: history })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.text) throw new Error(data.error || "API unavailable");
+      updateHistory(data.text.replace(/<[^>]*>/g, '').trim());
+    } catch {
+      updateHistory(getLocalResponse(latestMessage));
     }
   }
 

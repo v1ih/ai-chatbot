@@ -25,3 +25,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Variáveis de ambiente (chaves nunca vão para o git)
+.env
+.env.*
